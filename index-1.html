@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PACK — Account Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #0f1117;
+    --sidebar:   #151820;
+    --card:      #1a1e2a;
+    --card2:     #1f2435;
+    --border:    #2a2f3e;
+    --teal:      #00c6b3;
+    --teal-dim:  #00c6b320;
+    --teal-soft: #00c6b340;
+    --amber:     #f59e0b;
+    --red:       #ef4444;
+    --green:     #22c55e;
+    --text:      #e4e8f1;
+    --muted:     #7c8496;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body)}
+
+  /* ── LAYOUT ── */
+  .shell{display:flex;height:100vh;overflow:hidden}
+
+  /* ── SIDEBAR ── */
+  .sidebar{
+    width:220px;min-width:220px;
+    background:var(--sidebar);
+    display:flex;flex-direction:column;
+    border-right:1px solid var(--border);
+    padding:0 0 24px;
+  }
+  .logo{
+    display:flex;align-items:center;gap:12px;
+    padding:24px 22px 28px;
+    border-bottom:1px solid var(--border);
+  }
+  .logo-icon{
+    width:42px;height:42px;border-radius:12px;
+    background:linear-gradient(135deg,#00c6b3,#007a70);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;box-shadow:0 4px 14px #00c6b340;
+    border:1px solid #00c6b360;
+  }
+  .logo-icon svg{width:26px;height:26px}
+  .logo-text{font-family:var(--font-head);font-size:17px;font-weight:800;color:var(--text);letter-spacing:.04em}
+  .logo-sub{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+
+  nav{flex:1;padding:20px 12px 0;display:flex;flex-direction:column;gap:4px}
+  .nav-label{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;padding:8px 10px 4px;margin-top:6px}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 14px;border-radius:10px;
+    cursor:pointer;transition:.15s;
+    font-size:14px;font-weight:500;color:var(--muted);
+    border:1px solid transparent;
+  }
+  .nav-item:hover{color:var(--text);background:var(--card)}
+  .nav-item.active{
+    color:var(--teal);background:var(--teal-dim);
+    border-color:var(--teal-soft);
+  }
+  .nav-item svg{width:18px;height:18px;flex-shrink:0}
+
+  .sidebar-footer{padding:16px 22px 0;border-top:1px solid var(--border);margin:0 0 0}
+  .gs-badge{
+    display:flex;align-items:center;gap:8px;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:8px;padding:10px 12px;
+  }
+  .gs-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;box-shadow:0 0 6px #22c55e80}
+  .gs-info{flex:1}
+  .gs-title{font-size:11px;font-weight:600;color:var(--text)}
+  .gs-sub{font-size:10px;color:var(--muted)}
+  .gs-badge.error .gs-dot{background:var(--red);box-shadow:0 0 6px #ef444480}
+
+  /* ── MAIN ── */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+  .topbar{
+    height:62px;min-height:62px;
+    background:var(--sidebar);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 28px;gap:16px;
+  }
+  .topbar-title{font-family:var(--font-head);font-size:18px;font-weight:700}
+  .topbar-right{display:flex;align-items:center;gap:12px}
+  .breadcrumb{font-size:12px;color:var(--muted)}
+  .breadcrumb span{color:var(--teal)}
+
+  /* config panel */
+  .cfg-btn{
+    display:flex;align-items:center;gap:7px;padding:8px 14px;
+    background:var(--card);border:1px solid var(--border);border-radius:8px;
+    cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);
+    transition:.15s;font-family:var(--font-body);
+  }
+  .cfg-btn:hover{color:var(--teal);border-color:var(--teal-soft)}
+  .cfg-btn svg{width:14px;height:14px}
+
+  .content{flex:1;overflow-y:auto;padding:24px 28px}
+
+  /* ── CONFIG MODAL ── */
+  .modal-overlay{
+    position:fixed;inset:0;background:#00000088;
+    display:flex;align-items:center;justify-content:center;
+    z-index:100;backdrop-filter:blur(4px);
+  }
+  .modal-overlay.hidden{display:none}
+  .modal{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:28px;width:480px;max-width:95vw;
+  }
+  .modal-title{font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:6px}
+  .modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+  .field input,.field select{
+    width:100%;background:var(--bg);border:1px solid var(--border);
+    border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;
+    font-family:var(--font-body);outline:none;transition:.15s;
+  }
+  .field input:focus,.field select:focus{border-color:var(--teal)}
+  .modal-actions{display:flex;gap:10px;margin-top:22px}
+
+  /* ── BUTTONS ── */
+  .btn{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;
+    cursor:pointer;border:none;font-family:var(--font-body);transition:.15s;
+  }
+  .btn svg{width:14px;height:14px}
+  .btn-primary{background:var(--teal);color:#0f1117}
+  .btn-primary:hover{background:#00e0ca}
+  .btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+  .btn-ghost:hover{border-color:var(--teal);color:var(--teal)}
+  .btn-danger{background:#ef444418;color:var(--red);border:1px solid #ef444430}
+  .btn-danger:hover{background:#ef444430}
+  .btn-sm{padding:6px 12px;font-size:12px}
+  .btn-icon{padding:7px;border-radius:7px}
+
+  /* ── PAGE SECTIONS ── */
+  .page{display:none}
+  .page.active{display:block}
+
+  /* stat cards */
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:24px}
+  .stat-card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:20px 22px;
+  }
+  .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .stat-value{font-family:var(--font-head);font-size:26px;font-weight:700}
+  .stat-value.teal{color:var(--teal)}
+  .stat-value.amber{color:var(--amber)}
+  .stat-value.green{color:var(--green)}
+  .stat-sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+  /* section header */
+  .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+  .sec-title{font-family:var(--font-head);font-size:15px;font-weight:700}
+  .sec-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+  /* date display */
+  .date-display{
+    font-family:var(--font-head);font-size:22px;font-weight:800;
+    color:var(--teal);letter-spacing:.02em;margin-bottom:20px;
+  }
+
+  /* date picker */
+  input[type="date"]{
+    background:var(--card);border:1px solid var(--border);border-radius:8px;
+    padding:8px 12px;color:var(--text);font-size:13px;
+    font-family:var(--font-body);outline:none;cursor:pointer;
+  }
+  input[type="date"]:focus{border-color:var(--teal)}
+  input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.6)}
+
+  /* table card */
+  .table-card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;overflow:hidden;
+  }
+  .table-scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  thead tr{background:var(--card2);border-bottom:2px solid var(--border)}
+  thead th{
+    padding:13px 16px;text-align:left;
+    font-size:11px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;
+  }
+  tbody tr{border-bottom:1px solid var(--border);transition:.12s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--card2)}
+  tbody td{padding:12px 16px;font-size:13px;vertical-align:middle}
+  tbody td.mono{font-family:var(--font-mono);font-size:12px}
+
+  /* editable cell */
+  .cell-input{
+    background:transparent;border:none;border-bottom:1px solid transparent;
+    color:var(--text);font-size:13px;font-family:var(--font-body);
+    width:100%;outline:none;padding:2px 4px;transition:.15s;
+  }
+  .cell-input:focus{border-bottom-color:var(--teal);background:var(--teal-dim);border-radius:4px 4px 0 0}
+  .cell-input.mono{font-family:var(--font-mono);font-size:12px}
+  .cell-input[type="number"]{text-align:right}
+
+  /* select inside cell */
+  .cell-select{
+    background:transparent;border:none;color:var(--text);
+    font-size:13px;font-family:var(--font-body);cursor:pointer;
+    outline:none;padding:2px 4px;width:100%;
+  }
+  .cell-select:focus{outline:1px solid var(--teal);border-radius:4px}
+
+  /* badges */
+  .badge{
+    display:inline-flex;align-items:center;padding:3px 9px;
+    border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;
+  }
+  .badge-renewal{background:#f59e0b1a;color:var(--amber);border:1px solid #f59e0b40}
+  .badge-new{background:#22c55e1a;color:var(--green);border:1px solid #22c55e40}
+
+  /* notes cell */
+  .notes-wrap{display:flex;align-items:center;gap:6px;min-width:120px}
+  .notes-input{flex:1;min-width:50px}
+
+  /* total bar */
+  .total-bar{
+    display:flex;align-items:center;justify-content:flex-end;gap:24px;
+    padding:14px 20px;
+    background:var(--card2);border-top:1px solid var(--border);
+  }
+  .total-item{display:flex;align-items:center;gap:8px}
+  .total-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .total-value{font-family:var(--font-mono);font-size:16px;font-weight:600;color:var(--teal)}
+  .total-value.red{color:var(--red)}
+
+  /* month grid */
+  .month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .month-card{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:20px 22px;transition:.15s;
+  }
+  .month-card:hover{border-color:var(--teal-soft)}
+  .month-name{font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:14px;color:var(--teal)}
+  .month-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .month-row-label{font-size:12px;color:var(--muted)}
+  .month-row-val{font-family:var(--font-mono);font-size:13px;font-weight:600}
+
+  /* empty state */
+  .empty{
+    padding:48px 24px;text-align:center;color:var(--muted);
+    font-size:14px;border-top:1px solid var(--border);
+  }
+  .empty svg{width:40px;height:40px;margin-bottom:12px;opacity:.3}
+
+  /* action row */
+  .action-row{
+    display:flex;align-items:center;gap:8px;
+    padding:14px 16px;border-top:1px solid var(--border);
+    background:var(--card2);
+  }
+
+  /* loader */
+  .loader{
+    display:inline-block;width:14px;height:14px;
+    border:2px solid var(--border);border-top-color:var(--teal);
+    border-radius:50%;animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* toast */
+  .toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:200}
+  .toast{
+    background:var(--card2);border:1px solid var(--border);
+    border-radius:10px;padding:12px 18px;font-size:13px;
+    display:flex;align-items:center;gap:10px;
+    animation:fadeIn .3s ease;min-width:220px;
+  }
+  .toast.success .toast-dot{background:var(--green)}
+  .toast.error .toast-dot{background:var(--red)}
+  .toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* scrollbar */
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+
+  /* responsive */
+  @media(max-width:700px){
+    .sidebar{width:60px;min-width:60px}
+    .logo-text,.logo-sub,.nav-item span,.nav-label,.sidebar-footer{display:none}
+    .nav-item{justify-content:center;padding:12px}
+    .content{padding:16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAh4AAAIrCAYAAACgdJBUAACjFElEQVR4nOy9d7hkVZm3fa9zOudAdwMN3eQcmhwkB0EAMyKKIqIYMOs4M8434854Z+adYAYVAypBRQUTIAoISM5ZcqbpROcczlnfH7+1u3ZXn1BhV+21dz33ddXVp885VfWc2nuv/VtPBMMwDMMw2ob33oV/R3nvT/Xe7563Te2kK28DDMMwDKNT8N4755z33g8H3gKcD+yRs1mGYRiGYZQV7/1Q7/07vPf3e+8Xee//xns/NG+7DMMwDMMoGd57571/i/f+bu99j/d+g/f+Uu/9FsnP87bRMAzDMIyS4L0/wHt/axAdCbd773cLPy+98LAcD8MwDMNoIalk0j2AzwOHovuvD78yHpgA4JzzfbyEYRiGYRhG7Xjv9/He/9J7v9pvzqve+9PztrFdmMfDMAzDMFpAytOxE/BZ4GRgRB+/Og7YxXvf3T7rDMMwDMMoHSnRMdN7/y3v/eI+PB0JPd77X3jvJ+RstmEYhmEYRSMlOiZ57//Le79gANHRG/59yHu/Xc6mtwULtRiGYRhGhoQGYeOA9wFnA1sM9Ovh34mEBNOyV7aY8DAMwzCMDPHejwROBz4GTKvxaWOAraH8lS0mPAzDMAyjSVLhldHAOcCXqa8V+jhgX+/9qBaYFxUmPAzDMAyjSUJ4ZQTwLuCTwA51vsQQYF/U06PUmPAwDMMwjCbx3g8D3gZ8Dti1wZeZAUzKyqZYMeFhGIZhGE0QwiwnA18A9qaSMFovExk4EbUUmPAwDMMwjAZIVZ/sjVqh74fuq80IjxllbyRmwsMwDMMw6sR770Jexw6oeuVQoFnBMBHYDRjerH0xY8LDMAzDMOogJTp2Av4W9evIQiwMA/ah5P08THgYhmEYRo2kRMe2yNPxLlQKmxUzKXmehwkPwzAMw6iRIDq2Aj4KnIWqULJs+DUF2CbD14sOEx6GYRiGUSPe+2nAR4APUulKmmVIZDywU5kTTE14GIZhGEYNhK6i54bHdLL1dCSMAHYGRgbvSunyPEx4GIZhGMYgeO+HA6cBH0KNviBbT0eCA3ahxHkeJjwMwzAMow9S81dGoXyOfwZ2bOVbhn93ArZr4fvkigkPwzAMw6giVb0yHHg78FnUY6MdTEChnFJiwsMwDMMwqgiiYwjwFuCLwJ5tfPuRwHbe+yHOuVbkkeSKCQ/DMAzDqMJ73wUch4a+7d2mt3Uo3DIc2AN1Mi0dJjwMwzAMY3MOAD4DHIhaobezuqQLeVhK2c/DhIdhGIZhpAgNwj4BHAMMzcmMrcKjdJjwMAzDMDqeVAXL1ii88m5gVA6mJJ6VMZS0ssWEh2EYhtHRpCpYJgHnoNLZPERHmmGog+nonO3InCF5G2AYRv7k3R2xjJn7RjFIiY6xwNmoHXreIQ6P7s/7ojyPp/I1J1tMeBhGyUhERD0386Lc+JObRN52GOUh1avjTDRtdsYgT2kHyUZgJzSt1oSHYRjx0t+NOQiSrtSjOzy6Uv92oXWhu+p3Xepf+vi3P3x49IbHhvDveqAn9b3k6+rf73XO9Q72txlGowTR8U7gk2hGSkyMoYSNxEx4GEbO9BfmGOwmG6ZXDkWx4GGo6dBIFJseFb4eHv4dhoZPpX82MvXcIVWP5LW7Uw9HRWjUmh+WFhI9SHCsB9YBa5HoWB/+3ZD62erwWOm9T75eBawIX68A1oTXWJc8nHM9g3xmm3zWJmQ6G+/9UJTT8TkkOmIbyDYS2NF73z3YuV0kTHgYRpvpS2gM4KUYgoTBUCQcxgJTgMloiNS48BiLmg2NDl/3JSyGhsdwJCSGsKk3g9T/+3o0g6969KYeUPF2JN9LC5T1SGCsoSJIliLxsQJYFv6/xHs/H1gALKYiUtYC651zvvpzrudYGOUiNAg7EpXNxig6QNf8bsB4YFHOtmSGCQ/DaBNJfkJfN78gMIYjb8Q4YEtUSjcx/H8MWnwmhp9NQgJjOBVBkfZYQCVMAnEuqrXgU/+mRUsSnkl7SdYAS4CFSHwsQgJkCfB6ECVzws+Xh9/f0JfQsFySchME50Fo/spexHt9OGB3YCqwqCznpQkPw2gficAYyqYCYwYaCjUJeTOmAVujbPZRVEIeiahI/h/rYpkl/eWSDOvn9xNRUh3CWYFEyOzwmAu8DrzmvZ8NzKciRtZR8cQYJSJ1494L+DxwAvFfR1NQlc2TZRAdYMLDMFpCyL8YjlylY5CnYiuUKDaRymIyI/w7gkpOxjAqQqOvRdH3831Dn0uS95JmKhITe1HJL1mDQjRzgJeRGFmARMh87/0C5C3ZGLJJJ7omlGUXWnZSZbM7Ap8G3oSuudgZDUwv03lmwsMwMiAkqY1G4ZDJyGOxLRIa09CNb3r4WZJ7MTw80tUitWCio38G+mySJNkRqe9tA+yKvCNJsuoy5B2Zh7wi84DXgOe998n3lgCrnHN9hmqM+AiiY0vgo8A7UKiyCCJ+BLADWjdW5WxLJpjwMIx+GKgfhvd+FPJczAyPbakIjS1R4ud4FCpJkjutU3B+9HdzSTwkSfgLKs2jkhLfdWjBX0QIzyAPyave+1eBF5C3ZAkSI33mjIAlruZBytMxHYVXzqEy9TV20QGVgXETgVVl8HyY8DBKTdj1TKAiNPYB9kNejYnoZpA05DKMrKm+4XVRCc1MQoJ3fyRE5qOwzGNIhDyNwjPzq/uHFP3G02q8928A/gW1RC/Ltb0r8sTOzduQZjHhYRSevhbhkMU+A7lY90RiYwdUmTCe/jtfGka7SQuRnYADUILqK8CjwF3e+6dQ9cySdCK0CZDN8d7vjzwdR1Ae0QEKCc/03t9f9GNuwsMoJNXVKOH/I9COYCfk2TgYhVKSYWrDKL7L1Sg3Q5AAmYS8cgcCJ6F8kPuAR4IImU0qHNPplTGpCpYZwN+grqTDczYrayagc6LwCaYmPIxCUT1oLZUgujvybhwM7IFi6ROQGDGxYRSRIcg7Nw7dcA5B+R9PAw9R8YQscM6tycvIvEmJjmnA+cCbqTSDKxPDUbhlDMoPKiy2IBuFI+RtbIGa6uyNkscOQKGVSUhsWBWKUUaSTqrLUNOyh5An5NHw/8XOuZ7crGszKdExEY23/yTadJSNpLX7bcB5zrknihxmM4+HURiCd2MmUv1HIsExEzXXGU254rmG0Rfp5NTJyNN3HCrPvR+4x3v/MDDPObc2NyvbRBAdI4H3Ah+mnKIDKk6C7VGi/BP5mdI8JjyMqKiOVYcx8tuiEsQDgOPRhTcFuVPNa2d0Kt0oFDMe5TW9AYViHkZhmPtQWGZ+4gUpWy5ISCL/IPBFtAkpO5PQ+lfoY2jCw4iKqtyNXVAo5ThgX5Q4OgULoxhGNV0oF2Qcqn44CJXi3gvc6b2/H5jrnFuXn4nZkmqF/nE6Q3SASv+38t4Pdc6tz9uYRjHhYeRKOk4ZcjcmoVDKfiibfxfU/XE05t0wjFoYhfKdpiPh/kbgbuDuEIZ5nlCWC8UsyQ1rxduBz6BwU6cwBIVbJqC2+4XEhIeRKyFGOxx5M/ZFraUPotJzw0pgDaN+HFrfJ6Ob1A4oTPk0FS/I48Ac59wGKI4ACaLjaDTifm86b33YFQnLBUU5ZtWY8DByI7hKt0WJosejRWQ6agvcReetKIbRCrrQNTUGXW8HAaegiphrvPcPIgFSlDDMwcDfouTyTgy7boO8HvfnbUijmPAw2k5ICNsRdRY8Ai2E01GdeiI2CqfiDSNS0gJ+GCpFn4x2zrNQOe4t3vt7gVdjrIZJlc3ujTwdx9CZogMkILfK24hmMOFhtIS+sue991sDewHHIsGxC8rp6Os8NG+HYWSLq/p6LKoU2wt1+nwMuNl7fyvwuHNuRfLLeVfDBNGxH/CvwImUrytpPYwAtvfejyhq4zgTHkbmVCWMDkHqfB+ULHogKv2bhPXdMIy8SUYNzKRynZ4A3OC9/wvwlHNuaWosQS5473cBPgtCsp0sOjy6b++GQi7P5mtOY5jwMDInLFJD0YVxGCqHnYXCK2MxwWEYMTIM5YBsifKtTgZu997fCDwOLCaHEKj3fgckOt4GjGz3+0dGIv72RCLRhIdheO+7qSSMvhG5crdFC4YJDsOIn6GohH0KqjQ7AZXjXue9v8s5t6xdhnjvx6E+HWegHiWGSIYIFhITHkYmBMExDSWKno5CKjPRLqoLSxY1jKKRlOMegnbYRwJ/8N7/EXjMObe0FW+aSiQdgrzce4EPUulKumVKY9InUQjLYFoSnUQtXFOIYzjkkW3UqTMcQ4gJkMexMeRhlXIMsmhYPAxCiKXQDxFjIjCXQjGMYfN24nQ4HGBHbaSHQGSrKZKCnD8dJuoaqcpFrWEJ5E4RFWSTCuqFD6BW3G/IehXFGEd+y2HXE0YiEYhc0wUQjV1R0GVK+mBKjq8GEPgf7RWsK1IJ6Fm0MtHYzCKPMfqgG8SiCrVH+VSBT3JaRARPX+0GujuJTLXiY8S+CTWoJ4FZmBo4eZT0DViqnpA8MwhqzRGJU4hRoXnJ9pqFUUkjVLCEJxkEfWdM8GikFwWJQKyHmScC4pJQHxAMCeQkxJsirMWJgAAAABJRU5ErkJggg==" style="width:34px;height:34px;object-fit:contain;filter:brightness(0) invert(1)" alt="PACK logo"/>
+      </div>
+      <div>
+        <div class="logo-text">PACK</div>
+        <div class="logo-sub">Account Manager</div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-label">Menu</div>
+      <div class="nav-item active" onclick="switchPage('daily')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Daily Collection</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('monthly')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        <span>Monthly Report</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('expenses')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Expenses</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer" style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="gs-badge" id="gsBadge">
+        <div class="gs-dot" id="gsDot"></div>
+        <div class="gs-info">
+          <div class="gs-title">Google Sheets</div>
+          <div class="gs-sub" id="gsStatus">Not configured</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="pageTitle">Daily Collection</div>
+        <div class="breadcrumb">PACK › <span id="pageCrumb">Daily</span></div>
+      </div>
+      <div class="topbar-right">
+        <button class="cfg-btn" onclick="openConfig()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+          Configure Sheets
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══════════════════════════════
+           PAGE: DAILY COLLECTION
+      ══════════════════════════════ -->
+      <div class="page active" id="page-daily">
+        <div class="sec-header">
+          <div>
+            <div class="date-display" id="dailyDateDisplay">MARCH 17, 2026</div>
+          </div>
+          <div class="sec-right">
+            <input type="date" id="dailyDatePicker" onchange="onDateChange(this.value)"/>
+            <button class="btn btn-ghost btn-sm" onclick="loadDailyData()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.5"/></svg>
+              Refresh
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="addDailyRow()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Entry
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="saveDailyData()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save to Sheets
+            </button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-scroll">
+            <table id="dailyTable">
+              <thead>
+                <tr>
+                  <th style="width:44px">#</th>
+                  <th>Entry ID</th>
+                  <th>Member ID</th>
+                  <th>Name</th>
+                  <th>Notes</th>
+                  <th style="text-align:right">Cash (₹)</th>
+                  <th style="text-align:right">UPI (₹)</th>
+                  <th style="width:50px"></th>
+                </tr>
+              </thead>
+              <tbody id="dailyBody">
+              </tbody>
+            </table>
+          </div>
+          <div class="total-bar">
+            <div class="total-item">
+              <span class="total-label">Cash</span>
+              <span class="total-value" id="totalCash">₹0</span>
+            </div>
+            <div class="total-item">
+              <span class="total-label">UPI</span>
+              <span class="total-value" id="totalUPI">₹0</span>
+            </div>
+            <div style="width:1px;height:28px;background:var(--border)"></div>
+            <div class="total-item">
+              <span class="total-label">Total Collection</span>
+              <span class="total-value" id="totalCollection" style="font-size:20px">₹0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           PAGE: MONTHLY REPORT
+      ══════════════════════════════ -->
+      <div class="page" id="page-monthly">
+        <div class="sec-header">
+          <div class="sec-title">Monthly Summary</div>
+          <div class="sec-right">
+            <button class="btn btn-ghost btn-sm" onclick="loadMonthlyReport()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.5"/></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-row" id="monthlyStats">
+          <div class="stat-card">
+            <div class="stat-label">Current Month Collection</div>
+            <div class="stat-value teal" id="mCurCollection">₹0</div>
+            <div class="stat-sub" id="mCurMonth">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Entries</div>
+            <div class="stat-value amber" id="mCurEntries">0</div>
+            <div class="stat-sub">entries this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">All-Time Collection</div>
+            <div class="stat-value green" id="mAllTime">₹0</div>
+            <div class="stat-sub">across all months</div>
+          </div>
+        </div>
+
+        <div class="sec-title" style="margin-bottom:14px">Month-wise Breakdown</div>
+        <div class="month-grid" id="monthGrid">
+          <div class="empty" style="border:none;grid-column:1/-1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            <div>No data yet. Configure Google Sheets and load data.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           PAGE: EXPENSES
+      ══════════════════════════════ -->
+      <div class="page" id="page-expenses">
+        <div class="sec-header">
+          <div class="sec-title">Expense Tracker</div>
+          <div class="sec-right">
+            <button class="btn btn-ghost btn-sm" onclick="loadExpenses()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.5"/></svg>
+              Refresh
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="addExpenseRow()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Expense
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="saveExpenses()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save to Sheets
+            </button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-scroll">
+            <table id="expenseTable">
+              <thead>
+                <tr>
+                  <th style="width:44px">#</th>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th style="text-align:right">Amount (₹)</th>
+                  <th style="width:50px"></th>
+                </tr>
+              </thead>
+              <tbody id="expenseBody">
+              </tbody>
+            </table>
+          </div>
+          <div class="total-bar">
+            <div class="total-item">
+              <span class="total-label">Total Expense</span>
+              <span class="total-value red" id="totalExpense">₹0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .content -->
+  </div><!-- end .main -->
+</div>
+
+<!-- ══════════════════════════════
+     CONFIG MODAL
+══════════════════════════════ -->
+<div class="modal-overlay hidden" id="configModal">
+  <div class="modal">
+    <div class="modal-title">Configure Google Sheets</div>
+    <div class="modal-sub">Connect your Google Apps Script Web App to sync data with Google Sheets.</div>
+    <div class="field">
+      <label>Apps Script Web App URL</label>
+      <input type="text" id="cfgUrl" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"/>
+    </div>
+    <div class="field">
+      <label>Spreadsheet ID (optional display)</label>
+      <input type="text" id="cfgSheetId" placeholder="From your Google Sheets URL"/>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.7;margin-top:4px">
+      <strong style="color:var(--teal)">Setup guide:</strong><br>
+      1. Open your Google Sheet with the 3 tabs: <em>DAILY REPORT, MONTHLY REPORTS, EXPENSE REPORTS</em><br>
+      2. Go to <em>Extensions → Apps Script</em><br>
+      3. Paste the provided Apps Script code (see README)<br>
+      4. Deploy as Web App → Anyone (or Anyone with link)<br>
+      5. Paste the deployment URL above
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveConfig()">Save & Connect</button>
+      <button class="btn btn-ghost" onclick="closeConfig()">Cancel</button>
+      <button class="btn btn-ghost" onclick="testConnection()" style="margin-left:auto">Test Connection</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCRIPT MODAL
+══════════════════════════════ -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+const SHEETS_URL    = 'https://script.google.com/macros/s/AKfycbzYj1ZiuGuXG6d4ZSJGYxFlXGfHfNPoTViNT6QkNMMK4PvyhAKdSk4SUQDmqTZZmxr9Rg/exec';
+const SHEETS_ID     = '1Vo8k_hEm6OrJt-Bqf1T8vxcMH4_U9DoXkxsJPt9lKsw';
+
+let cfg = {
+  url:     localStorage.getItem('gs_url')     || SHEETS_URL,
+  sheetId: localStorage.getItem('gs_sheetId') || SHEETS_ID
+};
+// persist immediately so badge shows connected on first load
+localStorage.setItem('gs_url',     cfg.url);
+localStorage.setItem('gs_sheetId', cfg.sheetId);
+
+let dailyRows   = [];
+let expenseRows = [];
+let currentDate = getTodayStr();
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  updateConnectionBadge();
+  setDatePicker(currentDate);
+  updateDateDisplay(currentDate);
+  renderDailyRows();
+  renderExpenseRows();
+  // Auto-create sheets & headers, then load today's data
+  initSheets();
+});
+
+/* ═══════════════════════════════════════════════
+   AUTO-SETUP SHEETS
+═══════════════════════════════════════════════ */
+function initSheets() {
+  showLoadingOverlay();
+  const sheets = [
+    {
+      name: 'DAILY REPORT',
+      headers: ['DATE','ENTRY_ID','MEMBER_ID','NAME','NOTES','CASH','UPI']
+    },
+    {
+      name: 'MONTHLY REPORTS',
+      headers: ['MONTH','TOTAL_COLLECTION','TOTAL_ENTRIES']
+    },
+    {
+      name: 'EXPENSE REPORTS',
+      headers: ['DATE','TYPE','DESCRIPTION','AMOUNT']
+    }
+  ];
+  apiPost({ action: 'initSheets', sheets })
+    .then(res => {
+      if (res && res.ok) {
+        toast('Sheets ready ✓', 'success');
+      }
+      loadDailyData();
+    })
+    .catch(() => {
+      toast('Could not reach Google Sheets — loading offline', 'error');
+      for (let i = 0; i < 12; i++) dailyRows.push(emptyDailyRow(i+1));
+      renderDailyRows();
+      hideLoadingOverlay();
+    });
+}
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function getTodayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+function formatDateDisplay(str) {
+  if (!str) return '';
+  const d = new Date(str + 'T00:00:00');
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}).toUpperCase();
+}
+function emptyDailyRow(n) {
+  return { entryId:`E-${String(n).padStart(3,'0')}`, memberId:'', name:'', notes:'', cash:0, upi:0 };
+}
+function emptyExpenseRow() {
+  return { date: currentDate, type:'', description:'', amount:0 };
+}
+function setDatePicker(str) {
+  document.getElementById('dailyDatePicker').value = str;
+}
+function updateDateDisplay(str) {
+  document.getElementById('dailyDateDisplay').textContent = formatDateDisplay(str);
+}
+
+/* ═══════════════════════════════════════════════
+   PAGE NAVIGATION
+═══════════════════════════════════════════════ */
+const PAGE_TITLES = {daily:'Daily Collection', monthly:'Monthly Report', expenses:'Expenses'};
+const PAGE_CRUMBS = {daily:'Daily', monthly:'Monthly', expenses:'Expenses'};
+function switchPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelector(`[onclick="switchPage('${id}')"]`).classList.add('active');
+  document.getElementById('pageTitle').textContent = PAGE_TITLES[id];
+  document.getElementById('pageCrumb').textContent = PAGE_CRUMBS[id];
+  if (id === 'monthly') loadMonthlyReport();
+  if (id === 'expenses' && cfg.url) loadExpenses();
+}
+
+/* ═══════════════════════════════════════════════
+   DAILY TABLE
+═══════════════════════════════════════════════ */
+function renderDailyRows() {
+  const tbody = document.getElementById('dailyBody');
+  tbody.innerHTML = '';
+  if (!dailyRows.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div>No entries for this date.</div></div></td></tr>`;
+    recalcDaily();
+    return;
+  }
+  dailyRows.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    const notes = row.notes || '';
+    const badgeHtml = notes === 'Renewal'
+      ? `<span class="badge badge-renewal">Renewal</span>`
+      : notes === 'New'
+        ? `<span class="badge badge-new">New</span>`
+        : '';
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:12px">${i+1}</td>
+      <td class="mono"><input class="cell-input mono" value="${row.entryId}" onchange="dailyRows[${i}].entryId=this.value"/></td>
+      <td><input class="cell-input mono" type="number" min="1" step="1" value="${row.memberId||''}" onchange="dailyRows[${i}].memberId=this.value.replace(/[^0-9]/g,'')" placeholder="1"/></td>
+      <td><input class="cell-input" value="${row.name}" onchange="dailyRows[${i}].name=this.value" placeholder="Member Name"/></td>
+      <td class="notes-cell" data-idx="${i}">
+        <div class="notes-wrap">
+          ${badgeHtml}
+          <input class="cell-input notes-input" data-idx="${i}" value="${notes==='Renewal'||notes==='New' ? '' : notes}" placeholder="n=New · r=Renewal" style="flex:1;min-width:60px"/>
+        </div>
+      </td>
+      <td style="text-align:right"><input class="cell-input" type="number" value="${row.cash||''}" placeholder="0" onchange="dailyRows[${i}].cash=+this.value||0;recalcDaily()"/></td>
+      <td style="text-align:right"><input class="cell-input" type="number" value="${row.upi||''}" placeholder="0" onchange="dailyRows[${i}].upi=+this.value||0;recalcDaily()"/></td>
+      <td>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="removeDailyRow(${i})" title="Remove">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Attach smart key listeners to all notes inputs
+  document.querySelectorAll('.notes-input').forEach(input => {
+    input.addEventListener('keydown', function(e) {
+      const idx = +this.dataset.idx;
+      const key = e.key.toLowerCase();
+      if (key === 'r') {
+        e.preventDefault();
+        dailyRows[idx].notes = 'Renewal';
+        renderDailyRows();
+        // refocus same row's notes input
+        const next = document.querySelector(`.notes-input[data-idx="${idx}"]`);
+        if (next) next.focus();
+      } else if (key === 'n') {
+        e.preventDefault();
+        dailyRows[idx].notes = 'New';
+        renderDailyRows();
+        const next = document.querySelector(`.notes-input[data-idx="${idx}"]`);
+        if (next) next.focus();
+      } else if (key === 'backspace' || key === 'delete') {
+        if ((dailyRows[idx].notes === 'Renewal' || dailyRows[idx].notes === 'New') && this.value === '') {
+          e.preventDefault();
+          dailyRows[idx].notes = '';
+          renderDailyRows();
+          const next = document.querySelector(`.notes-input[data-idx="${idx}"]`);
+          if (next) next.focus();
+        }
+      }
+    });
+    input.addEventListener('change', function() {
+      const idx = +this.dataset.idx;
+      if (dailyRows[idx].notes !== 'Renewal' && dailyRows[idx].notes !== 'New') {
+        dailyRows[idx].notes = this.value;
+      }
+    });
+  });
+
+  recalcDaily();
+}
+
+function recalcDaily() {
+  const cash = dailyRows.reduce((s,r)=>s+(+r.cash||0),0);
+  const upi  = dailyRows.reduce((s,r)=>s+(+r.upi||0),0);
+  document.getElementById('totalCash').textContent = '₹'+cash.toLocaleString('en-IN');
+  document.getElementById('totalUPI').textContent  = '₹'+upi.toLocaleString('en-IN');
+  document.getElementById('totalCollection').textContent = '₹'+(cash+upi).toLocaleString('en-IN');
+}
+
+function addDailyRow() {
+  const n = dailyRows.length + 1;
+  dailyRows.push(emptyDailyRow(n));
+  renderDailyRows();
+  // scroll to bottom
+  const c = document.querySelector('.content');
+  setTimeout(()=>c.scrollTo({top:c.scrollHeight,behavior:'smooth'}),50);
+}
+
+function removeDailyRow(i) {
+  dailyRows.splice(i,1);
+  renderDailyRows();
+}
+
+function onDateChange(val) {
+  currentDate = val;
+  updateDateDisplay(val);
+  if (cfg.url) loadDailyData();
+  else { dailyRows = []; for(let i=0;i<12;i++) dailyRows.push(emptyDailyRow(i+1)); renderDailyRows(); }
+}
+
+/* ═══════════════════════════════════════════════
+   EXPENSE TABLE
+═══════════════════════════════════════════════ */
+function renderExpenseRows() {
+  const tbody = document.getElementById('expenseBody');
+  tbody.innerHTML = '';
+  if (!expenseRows.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <div>No expenses recorded.</div></div></td></tr>`;
+    recalcExpenses();
+    return;
+  }
+  expenseRows.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:12px">${i+1}</td>
+      <td><input class="cell-input" type="date" value="${row.date}" onchange="expenseRows[${i}].date=this.value"/></td>
+      <td><input class="cell-input" value="${row.type}" onchange="expenseRows[${i}].type=this.value" placeholder="e.g. Equipment"/></td>
+      <td><input class="cell-input" value="${row.description}" onchange="expenseRows[${i}].description=this.value" placeholder="Description"/></td>
+      <td style="text-align:right"><input class="cell-input" type="number" value="${row.amount||''}" placeholder="0" onchange="expenseRows[${i}].amount=+this.value||0;recalcExpenses()"/></td>
+      <td>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="removeExpenseRow(${i})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  recalcExpenses();
+}
+
+function recalcExpenses() {
+  const total = expenseRows.reduce((s,r)=>s+(+r.amount||0),0);
+  document.getElementById('totalExpense').textContent = '₹'+total.toLocaleString('en-IN');
+}
+
+function addExpenseRow() {
+  expenseRows.push(emptyExpenseRow());
+  renderExpenseRows();
+  const c = document.querySelector('.content');
+  setTimeout(()=>c.scrollTo({top:c.scrollHeight,behavior:'smooth'}),50);
+}
+
+function removeExpenseRow(i) {
+  expenseRows.splice(i,1);
+  renderExpenseRows();
+}
+
+/* ═══════════════════════════════════════════════
+   MONTHLY REPORT (generated from dailyData cache)
+═══════════════════════════════════════════════ */
+let allDailyData = [];
+
+function loadMonthlyReport() {
+  if (!cfg.url) { buildMonthlyFromCache([]); return; }
+  const btn = event && event.target;
+  if (btn) { btn.innerHTML = '<span class="loader"></span> Loading...'; btn.disabled = true; }
+  apiFetch({ action:'getAll', sheet:'DAILY REPORT' })
+    .then(data => {
+      allDailyData = data.rows || [];
+      buildMonthlyFromCache(allDailyData);
+    })
+    .catch(()=>toast('Failed to load monthly data','error'))
+    .finally(()=>{ if(btn){btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.5"/></svg> Refresh';btn.disabled=false;}});
+}
+
+function buildMonthlyFromCache(rows) {
+  const map = {};
+  rows.forEach(row => {
+    const d = row[0]; // DATE
+    if (!d) return;
+    const dt = new Date(d + 'T00:00:00');
+    const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+    if (!map[key]) map[key] = { collection:0, entries:0 };
+    const cash = parseFloat(row[5])||0;
+    const upi  = parseFloat(row[6])||0;
+    map[key].collection += cash + upi;
+    map[key].entries++;
+  });
+
+  const keys = Object.keys(map).sort().reverse();
+  const grid = document.getElementById('monthGrid');
+
+  if (!keys.length) {
+    grid.innerHTML = `<div class="empty" style="border:none;grid-column:1/-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      <div>No data yet. Add daily entries first.</div></div>`;
+    document.getElementById('mCurCollection').textContent = '₹0';
+    document.getElementById('mCurEntries').textContent = '0';
+    document.getElementById('mAllTime').textContent = '₹0';
+    return;
+  }
+
+  // current month
+  const now = new Date();
+  const curKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const curData = map[curKey] || {collection:0,entries:0};
+  document.getElementById('mCurCollection').textContent = '₹'+curData.collection.toLocaleString('en-IN');
+  document.getElementById('mCurEntries').textContent = curData.entries;
+  document.getElementById('mCurMonth').textContent = now.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+
+  const allTime = keys.reduce((s,k)=>s+map[k].collection,0);
+  document.getElementById('mAllTime').textContent = '₹'+allTime.toLocaleString('en-IN');
+
+  grid.innerHTML = keys.map(k => {
+    const [yr,mo] = k.split('-');
+    const label = new Date(+yr,+mo-1,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'}).toUpperCase();
+    const d = map[k];
+    return `<div class="month-card">
+      <div class="month-name">${label}</div>
+      <div class="month-row"><span class="month-row-label">Total Collection</span><span class="month-row-val" style="color:var(--teal)">₹${d.collection.toLocaleString('en-IN')}</span></div>
+      <div class="month-row"><span class="month-row-label">Total Entries</span><span class="month-row-val">${d.entries}</span></div>
+      <div class="month-row"><span class="month-row-label">Avg per Entry</span><span class="month-row-val">₹${d.entries?Math.round(d.collection/d.entries).toLocaleString('en-IN'):0}</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   GOOGLE SHEETS API
+═══════════════════════════════════════════════ */
+function apiFetch(payload) {
+  if (!cfg.url) return Promise.reject('No URL configured');
+  const url = cfg.url + (cfg.url.includes('?')?'&':'?') + new URLSearchParams({data: JSON.stringify(payload)});
+  return fetch(url, {redirect:'follow'})
+    .then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+
+function apiPost(payload) {
+  if (!cfg.url) return Promise.reject('No URL configured');
+  return fetch(cfg.url, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify(payload),
+    redirect:'follow'
+  }).then(r => r.json());
+}
+
+function loadDailyData() {
+  if (!cfg.url) { toast('Please configure Google Sheets first','error'); return; }
+  showLoadingOverlay();
+  apiFetch({ action:'getByDate', sheet:'DAILY REPORT', date: currentDate })
+    .then(data => {
+      const rows = data.rows || [];
+      if (rows.length) {
+        dailyRows = rows.map(r => ({
+          entryId: r[1]||'', memberId: r[2]||'', name: r[3]||'',
+          notes: r[4]||'', cash: parseFloat(r[5])||0, upi: parseFloat(r[6])||0
+        }));
+      } else {
+        dailyRows = [];
+        for(let i=0;i<12;i++) dailyRows.push(emptyDailyRow(i+1));
+      }
+      renderDailyRows();
+      toast('Data loaded for '+formatDateDisplay(currentDate),'success');
+    })
+    .catch(()=>toast('Failed to load. Check your Sheets URL.','error'))
+    .finally(()=>hideLoadingOverlay());
+}
+
+function saveDailyData() {
+  if (!cfg.url) { toast('Configure Google Sheets first','error'); return; }
+  const validRows = dailyRows.filter(r => r.name || r.memberId || r.cash || r.upi);
+  if (!validRows.length) { toast('No data to save','error'); return; }
+  const rows = validRows.map(r => [currentDate, r.entryId, r.memberId, r.name, r.notes, r.cash, r.upi]);
+  showLoadingOverlay();
+  apiPost({ action:'setByDate', sheet:'DAILY REPORT', date: currentDate, rows })
+    .then(() => toast('Saved to Google Sheets ✓','success'))
+    .catch(() => toast('Save failed. Check URL & permissions.','error'))
+    .finally(()=>hideLoadingOverlay());
+}
+
+function loadExpenses() {
+  if (!cfg.url) return;
+  apiFetch({ action:'getAll', sheet:'EXPENSE REPORTS' })
+    .then(data => {
+      expenseRows = (data.rows||[]).map(r=>({
+        date: r[0]||'', type: r[1]||'', description: r[2]||'', amount: parseFloat(r[3])||0
+      }));
+      renderExpenseRows();
+    })
+    .catch(()=>toast('Failed to load expenses','error'));
+}
+
+function saveExpenses() {
+  if (!cfg.url) { toast('Configure Google Sheets first','error'); return; }
+  const validRows = expenseRows.filter(r => r.description || r.amount);
+  if (!validRows.length) { toast('No expenses to save','error'); return; }
+  const rows = validRows.map(r => [r.date, r.type, r.description, r.amount]);
+  showLoadingOverlay();
+  apiPost({ action:'setAll', sheet:'EXPENSE REPORTS', rows })
+    .then(()=>toast('Expenses saved ✓','success'))
+    .catch(()=>toast('Save failed.','error'))
+    .finally(()=>hideLoadingOverlay());
+}
+
+/* ═══════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════ */
+function openConfig() {
+  document.getElementById('cfgUrl').value = cfg.url || SHEETS_URL;
+  document.getElementById('cfgSheetId').value = cfg.sheetId || SHEETS_ID;
+  document.getElementById('configModal').classList.remove('hidden');
+}
+function closeConfig() {
+  document.getElementById('configModal').classList.add('hidden');
+}
+function saveConfig() {
+  cfg.url = document.getElementById('cfgUrl').value.trim();
+  cfg.sheetId = document.getElementById('cfgSheetId').value.trim();
+  localStorage.setItem('gs_url', cfg.url);
+  localStorage.setItem('gs_sheetId', cfg.sheetId);
+  updateConnectionBadge();
+  closeConfig();
+  toast('Configuration saved','success');
+  if (cfg.url) initSheets();
+}
+function testConnection() {
+  const url = document.getElementById('cfgUrl').value.trim();
+  if (!url) { toast('Enter a URL first','error'); return; }
+  const tempCfg = {...cfg, url};
+  const oldCfg = cfg; cfg = tempCfg;
+  apiFetch({action:'ping'})
+    .then(()=>toast('Connection successful ✓','success'))
+    .catch(()=>toast('Connection failed. Check URL & deployment.','error'))
+    .finally(()=>{ cfg = oldCfg; });
+}
+function updateConnectionBadge() {
+  const badge = document.getElementById('gsBadge');
+  const status = document.getElementById('gsStatus');
+  const dot = document.getElementById('gsDot');
+  if (cfg.url) {
+    status.textContent = 'Connected';
+    dot.style.background = 'var(--green)';
+    dot.style.boxShadow = '0 0 6px #22c55e80';
+    badge.classList.remove('error');
+  } else {
+    status.textContent = 'Not configured';
+    dot.style.background = 'var(--red)';
+    dot.style.boxShadow = '0 0 6px #ef444480';
+    badge.classList.add('error');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   UI UTILS
+═══════════════════════════════════════════════ */
+function toast(msg, type='success') {
+  const w = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast '+type;
+  t.innerHTML = `<div class="toast-dot"></div><span>${msg}</span>`;
+  w.appendChild(t);
+  setTimeout(()=>t.remove(), 3200);
+}
+let loadingEl = null;
+function showLoadingOverlay() {
+  if (loadingEl) return;
+  loadingEl = document.createElement('div');
+  loadingEl.style.cssText='position:fixed;inset:0;background:#00000040;z-index:50;display:flex;align-items:center;justify-content:center';
+  loadingEl.innerHTML='<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 28px;display:flex;align-items:center;gap:12px;font-size:14px"><span class="loader"></span> Syncing with Google Sheets…</div>';
+  document.body.appendChild(loadingEl);
+}
+function hideLoadingOverlay() {
+  if (loadingEl) { loadingEl.remove(); loadingEl=null; }
+}
+document.getElementById('configModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeConfig()});
+</script>
+
+<!-- ══════════════════════════════
+     APPS SCRIPT CODE (paste into Extensions → Apps Script, then Deploy as Web App)
+══════════════════════════════ -->
+<!--
+function doGet(e) {
+  var params = JSON.parse(e.parameter.data || '{}');
+  return handleRequest(params);
+}
+function doPost(e) {
+  var params = JSON.parse(e.postData.contents || '{}');
+  return handleRequest(params);
+}
+function handleRequest(p) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var result = {};
+  try {
+
+    // ── AUTO-INIT: create sheets + headers if missing ──────────────────
+    if (p.action === 'initSheets') {
+      p.sheets.forEach(function(def) {
+        var sh = ss.getSheetByName(def.name);
+        if (!sh) {
+          sh = ss.insertSheet(def.name);
+          sh.appendRow(def.headers);
+          // Style header row
+          var hdr = sh.getRange(1, 1, 1, def.headers.length);
+          hdr.setFontWeight('bold');
+          hdr.setBackground('#1a1e2a');
+          hdr.setFontColor('#ffffff');
+          sh.setFrozenRows(1);
+        } else {
+          // Sheet exists — ensure header row is present
+          var firstRow = sh.getRange(1,1,1,def.headers.length).getValues()[0];
+          var isEmpty = firstRow.every(function(c){ return c === '' || c === null; });
+          if (isEmpty) {
+            sh.insertRowBefore(1);
+            sh.getRange(1,1,1,def.headers.length).setValues([def.headers]);
+          }
+        }
+      });
+      result = { ok: true };
+
+    // ── PING ──────────────────────────────────────────────────────────
+    } else if (p.action === 'ping') {
+      result = { ok: true };
+
+    // ── GET ROWS BY DATE ──────────────────────────────────────────────
+    } else if (p.action === 'getByDate') {
+      var sh = ss.getSheetByName(p.sheet);
+      if (!sh) { result = { rows: [] }; }
+      else {
+        var data = sh.getDataRange().getValues();
+        var rows = data.slice(1).filter(function(r){ return r[0] === p.date; });
+        result = { rows: rows };
+      }
+
+    // ── SAVE ROWS FOR DATE (replace existing) ─────────────────────────
+    } else if (p.action === 'setByDate') {
+      var sh = ss.getSheetByName(p.sheet);
+      if (sh) {
+        var data = sh.getDataRange().getValues();
+        for (var i = data.length; i >= 2; i--) {
+          if (data[i-1][0] === p.date) sh.deleteRow(i);
+        }
+      }
+      p.rows.forEach(function(r){ sh.appendRow(r); });
+      result = { ok: true };
+
+    // ── GET ALL ROWS ──────────────────────────────────────────────────
+    } else if (p.action === 'getAll') {
+      var sh = ss.getSheetByName(p.sheet);
+      if (!sh) { result = { rows: [] }; }
+      else {
+        var data = sh.getDataRange().getValues();
+        result = { rows: data.slice(1) };
+      }
+
+    // ── OVERWRITE ALL ROWS ────────────────────────────────────────────
+    } else if (p.action === 'setAll') {
+      var sh = ss.getSheetByName(p.sheet);
+      if (sh) {
+        var last = sh.getLastRow();
+        if (last > 1) sh.deleteRows(2, last - 1);
+        p.rows.forEach(function(r){ sh.appendRow(r); });
+      }
+      result = { ok: true };
+    }
+
+  } catch(err) {
+    result = { error: err.message };
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+-->
+
+</body>
+</html>
