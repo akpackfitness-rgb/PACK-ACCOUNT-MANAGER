@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#0c0e14"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>PACK — Accounts</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET & ROOT ────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:       #0c0e14;
+  --surface:  #13161f;
+  --card:     #1a1e2a;
+  --card2:    #1f2436;
+  --border:   #252a3a;
+  --border2:  #2e3448;
+  --teal:     #00d4be;
+  --teal-dim: #00d4be18;
+  --teal-glow:#00d4be40;
+  --green:    #22c55e;
+  --green-dim:#22c55e18;
+  --amber:    #f59e0b;
+  --amber-dim:#f59e0b18;
+  --orange:   #f97316;
+  --orange-dim:#f9731618;
+  --red:      #ef4444;
+  --red-dim:  #ef444418;
+  --text:     #e8eaf2;
+  --text2:    #9ca3b8;
+  --text3:    #5c6480;
+  --font-h:   'Syne', sans-serif;
+  --font-b:   'DM Sans', sans-serif;
+  --font-m:   'DM Mono', monospace;
+  --r:        14px;
+  --r-sm:     10px;
+  --safe-b:   env(safe-area-inset-bottom, 0px);
+}
+html{height:100%;scroll-behavior:smooth}
+body{
+  min-height:100%;background:var(--bg);color:var(--text);
+  font-family:var(--font-b);font-size:15px;line-height:1.5;
+  overscroll-behavior:none;
+}
+
+/* ── VIEWS ───────────────────────────────────────── */
+.view{display:none;min-height:100vh;padding-bottom:calc(32px + var(--safe-b))}
+.view.active{display:block;animation:fadeUp .28s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HOME ────────────────────────────────────────── */
+.home-wrap{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:32px 20px;gap:0;
+}
+.home-logo{
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  margin-bottom:48px;
+}
+.logo-mark{
+  width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(135deg,var(--teal),#007a70);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 32px var(--teal-glow);
+  margin-bottom:16px;
+}
+.logo-mark img{width:44px;height:44px;object-fit:contain;filter:brightness(0) invert(1)}
+.home-title{
+  font-family:var(--font-h);font-size:28px;font-weight:800;
+  letter-spacing:.04em;color:var(--text);
+}
+.home-sub{font-size:13px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+
+.home-cards{width:100%;max-width:400px;display:flex;flex-direction:column;gap:14px}
+.home-card{
+  display:flex;align-items:center;gap:18px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px 22px;
+  cursor:pointer;transition:all .18s;
+  position:relative;overflow:hidden;
+  text-decoration:none;
+}
+.home-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--teal-dim),transparent);
+  opacity:0;transition:opacity .18s;
+}
+.home-card:active{transform:scale(.97)}
+.home-card:active::before{opacity:1}
+.hc-icon{
+  width:46px;height:46px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.hc-icon svg{width:22px;height:22px}
+.hc-icon.teal{background:var(--teal-dim);color:var(--teal)}
+.hc-icon.green{background:var(--green-dim);color:var(--green)}
+.hc-icon.amber{background:var(--amber-dim);color:var(--amber)}
+.hc-text{flex:1}
+.hc-title{font-family:var(--font-h);font-size:16px;font-weight:700;color:var(--text)}
+.hc-desc{font-size:12px;color:var(--text3);margin-top:2px}
+.hc-arrow{color:var(--text3)}
+.hc-arrow svg{width:18px;height:18px}
+
+/* ── TOP BAR ─────────────────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  padding-top:calc(14px + env(safe-area-inset-top, 0px));
+}
+.back-btn{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:.15s;
+  color:var(--text2);
+}
+.back-btn:active{background:var(--card2)}
+.back-btn svg{width:18px;height:18px}
+.topbar-title{font-family:var(--font-h);font-size:17px;font-weight:700;flex:1}
+.topbar-date{font-size:11px;color:var(--teal);font-weight:600;letter-spacing:.04em;text-align:right}
+
+/* ── MODULE CONTENT ──────────────────────────────── */
+.mod-content{padding:16px}
+
+/* ── DATE DISPLAY ────────────────────────────────── */
+.date-hero{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.date-label{font-family:var(--font-h);font-size:17px;font-weight:700;color:var(--teal);letter-spacing:.02em}
+.date-pick{
+  background:var(--card2);border:1px solid var(--border2);
+  border-radius:8px;padding:7px 10px;color:var(--text);
+  font-size:13px;font-family:var(--font-b);outline:none;
+  cursor:pointer;
+}
+.date-pick::-webkit-calendar-picker-indicator{filter:invert(.6)}
+
+/* ── ENTRY FORM ──────────────────────────────────── */
+.entry-form{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;margin-bottom:16px;
+}
+.form-title{
+  font-family:var(--font-h);font-size:14px;font-weight:700;
+  color:var(--text2);text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:16px;
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.form-input,.form-select{
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:12px 14px;
+  color:var(--text);font-size:15px;font-family:var(--font-b);
+  outline:none;transition:.15s;width:100%;
+  -webkit-appearance:none;appearance:none;
+}
+.form-input:focus,.form-select:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-dim)}
+.form-input[type="number"]{font-family:var(--font-m);font-size:16px}
+.form-input::placeholder{color:var(--text3)}
+
+/* total preview */
+.total-preview{
+  background:var(--teal-dim);border:1px solid var(--teal-glow);
+  border-radius:var(--r-sm);padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:4px;
+}
+.tp-label{font-size:12px;color:var(--teal);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.tp-value{font-family:var(--font-m);font-size:20px;font-weight:600;color:var(--teal)}
+
+/* ── BUTTONS ─────────────────────────────────────── */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 20px;border-radius:var(--r-sm);font-size:15px;
+  font-weight:600;cursor:pointer;border:none;
+  font-family:var(--font-b);transition:.15s;width:100%;
+}
+.btn:active{transform:scale(.97)}
+.btn svg{width:16px;height:16px;flex-shrink:0}
+.btn-primary{background:var(--teal);color:#0c0e14}
+.btn-primary:active{background:#00b8a4}
+.btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:active{background:var(--border)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid #ef444430}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.btn-row .btn-primary{grid-column:1/-1}
+
+/* ── SECTION HEADER ──────────────────────────────── */
+.section-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;margin-top:8px;
+}
+.section-title{font-family:var(--font-h);font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.1em}
+.section-count{
+  font-size:11px;font-weight:600;font-family:var(--font-m);
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:3px 10px;color:var(--text2);
+}
+
+/* ── ENTRY CARDS ─────────────────────────────────── */
+.cards-list{display:flex;flex-direction:column;gap:10px}
+.entry-card{
+  border-radius:var(--r);padding:16px;
+  display:flex;align-items:flex-start;gap:14px;
+  border:1px solid transparent;
+  animation:cardIn .25s ease both;
+  position:relative;overflow:hidden;
+}
+.entry-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.entry-card.new{background:var(--green-dim);border-color:#22c55e30}
+.entry-card.new::before{background:var(--green)}
+.entry-card.renewal{background:var(--amber-dim);border-color:#f59e0b30}
+.entry-card.renewal::before{background:var(--amber)}
+.entry-card.other{background:var(--orange-dim);border-color:#f9731630}
+.entry-card.other::before{background:var(--orange)}
+
+.card-avatar{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-h);font-size:15px;font-weight:800;
+  flex-shrink:0;
+}
+.entry-card.new .card-avatar{background:#22c55e25;color:var(--green)}
+.entry-card.renewal .card-avatar{background:#f59e0b25;color:var(--amber)}
+.entry-card.other .card-avatar{background:#f9731625;color:var(--orange)}
+
+.card-body{flex:1;min-width:0}
+.card-name{font-family:var(--font-h);font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
+.card-id{font-family:var(--font-m);font-size:11px;color:var(--text3)}
+.card-type-badge{
+  font-size:10px;font-weight:700;padding:2px 7px;
+  border-radius:20px;text-transform:uppercase;letter-spacing:.06em;
+}
+.badge-new{background:#22c55e20;color:var(--green);border:1px solid #22c55e30}
+.badge-renewal{background:#f59e0b20;color:var(--amber);border:1px solid #f59e0b30}
+.badge-other{background:#f9731620;color:var(--orange);border:1px solid #f9731630}
+
+.card-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+.card-amount{font-family:var(--font-m);font-size:17px;font-weight:600}
+.entry-card.new .card-amount{color:var(--green)}
+.entry-card.renewal .card-amount{color:var(--amber)}
+.entry-card.other .card-amount{color:var(--orange)}
+.card-cash-upi{font-size:10px;color:var(--text3);text-align:right}
+
+.card-edit-btn{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:7px;padding:5px 10px;
+  font-size:11px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:.15s;font-family:var(--font-b);
+  display:flex;align-items:center;gap:4px;
+}
+.card-edit-btn:active{background:var(--border)}
+.card-edit-btn svg{width:11px;height:11px}
+
+/* total footer */
+.total-footer{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:14px;
+}
+.tf-row{display:flex;flex-direction:column;align-items:center;gap:2px}
+.tf-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.tf-value{font-family:var(--font-m);font-size:16px;font-weight:600;color:var(--teal)}
+.tf-divider{width:1px;height:36px;background:var(--border2)}
+
+/* empty state */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px;gap:12px;text-align:center;
+}
+.empty-state svg{width:44px;height:44px;opacity:.2}
+.empty-state p{font-size:14px;color:var(--text3)}
+
+/* ── MONTHLY CARDS ───────────────────────────────── */
+.month-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;
+  animation:cardIn .25s ease both;
+}
+.month-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.month-name{font-family:var(--font-h);font-size:16px;font-weight:700;color:var(--teal)}
+.month-entries{
+  font-size:11px;font-weight:600;background:var(--teal-dim);color:var(--teal);
+  border-radius:20px;padding:3px 10px;border:1px solid var(--teal-glow);
+}
+.month-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ms-item{background:var(--bg);border-radius:var(--r-sm);padding:12px}
+.ms-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.ms-value{font-family:var(--font-m);font-size:18px;font-weight:600;color:var(--text)}
+
+/* ── EXPENSE CARDS ───────────────────────────────── */
+.expense-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px;
+  display:flex;align-items:flex-start;gap:14px;
+  animation:cardIn .25s ease both;
+}
+.exp-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:var(--red-dim);border:1px solid #ef444430;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--red);
+}
+.exp-icon svg{width:18px;height:18px}
+.exp-body{flex:1;min-width:0}
+.exp-type{font-family:var(--font-h);font-size:14px;font-weight:700}
+.exp-desc{font-size:13px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-date{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--font-m)}
+.exp-amount{font-family:var(--font-m);font-size:18px;font-weight:600;color:var(--red);flex-shrink:0}
+
+.exp-total{
+  background:var(--red-dim);border:1px solid #ef444430;
+  border-radius:var(--r);padding:16px 18px;
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:14px;
+}
+.et-label{font-size:13px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.06em}
+.et-value{font-family:var(--font-m);font-size:22px;font-weight:600;color:var(--red)}
+
+/* ── BOTTOM SHEET (edit modal) ───────────────────── */
+.sheet-overlay{
+  position:fixed;inset:0;background:#00000070;
+  z-index:100;opacity:0;pointer-events:none;
+  transition:opacity .25s;backdrop-filter:blur(4px);
+}
+.sheet-overlay.open{opacity:1;pointer-events:all}
+.bottom-sheet{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);border-top:1px solid var(--border);
+  border-radius:20px 20px 0 0;padding:0 16px;
+  z-index:101;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);
+  max-height:92vh;overflow-y:auto;
+  padding-bottom:calc(24px + var(--safe-b));
+}
+.bottom-sheet.open{transform:translateY(0)}
+.sheet-handle{
+  width:40px;height:4px;background:var(--border2);
+  border-radius:2px;margin:12px auto 20px;
+}
+.sheet-title{
+  font-family:var(--font-h);font-size:17px;font-weight:700;
+  margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);
+}
+
+/* ── LOADER ──────────────────────────────────────── */
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid var(--border2);border-top-color:var(--teal);
+  border-radius:50%;animation:spin .65s linear infinite;
+  flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOAST ───────────────────────────────────────── */
+.toast-wrap{
+  position:fixed;bottom:calc(24px + var(--safe-b));left:16px;right:16px;
+  z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;
+}
+.toast{
+  background:var(--card2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:13px 16px;
+  display:flex;align-items:center;gap:10px;font-size:14px;
+  animation:toastIn .3s ease;
+  box-shadow:0 8px 24px #00000050;
+}
+.toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.toast.success .toast-dot{background:var(--green);box-shadow:0 0 8px var(--green)}
+.toast.error .toast-dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LOADING OVERLAY ─────────────────────────────── */
+.load-overlay{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  z-index:300;transition:opacity .3s;
+}
+.load-overlay.hide{opacity:0;pointer-events:none}
+.load-overlay.gone{display:none}
+.load-text{font-size:14px;color:var(--text2)}
+
+/* ── STAGGER DELAYS ──────────────────────────────── */
+.cards-list .entry-card:nth-child(1){animation-delay:.04s}
+.cards-list .entry-card:nth-child(2){animation-delay:.08s}
+.cards-list .entry-card:nth-child(3){animation-delay:.12s}
+.cards-list .entry-card:nth-child(4){animation-delay:.16s}
+.cards-list .entry-card:nth-child(5){animation-delay:.20s}
+.cards-list .entry-card:nth-child(n+6){animation-delay:.22s}
+.cards-list .month-card:nth-child(1){animation-delay:.04s}
+.cards-list .month-card:nth-child(2){animation-delay:.08s}
+.cards-list .month-card:nth-child(3){animation-delay:.12s}
+.cards-list .expense-card:nth-child(1){animation-delay:.04s}
+.cards-list .expense-card:nth-child(2){animation-delay:.08s}
+.cards-list .expense-card:nth-child(3){animation-delay:.12s}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     LOADING OVERLAY
+════════════════════════════════════════ -->
+<div class="load-overlay" id="loadOverlay">
+  <div class="spinner" style="width:28px;height:28px;border-width:3px"></div>
+  <div class="load-text">Setting up your sheets…</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     HOME VIEW
+════════════════════════════════════════ -->
+<div class="view active" id="view-home">
+  <div class="home-wrap">
+    <div class="home-logo">
+      <div class="logo-mark">
+        <img src="data:image/png;base64,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" alt="PACK"/>
+      </div>
+      <div class="home-title">PACK</div>
+      <div class="home-sub">Account Manager</div>
+    </div>
+
+    <div class="home-cards">
+      <div class="home-card" onclick="openModule('daily')">
+        <div class="hc-icon teal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="hc-text">
+          <div class="hc-title">Daily Collection</div>
+          <div class="hc-desc">Log member payments by date</div>
+        </div>
+        <div class="hc-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+
+      <div class="home-card" onclick="openModule('monthly')">
+        <div class="hc-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </div>
+        <div class="hc-text">
+          <div class="hc-title">Monthly Report</div>
+          <div class="hc-desc">Auto-calculated monthly summary</div>
+        </div>
+        <div class="hc-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+
+      <div class="home-card" onclick="openModule('expenses')">
+        <div class="hc-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="hc-text">
+          <div class="hc-title">Expenses</div>
+          <div class="hc-desc">Track all gym expenses</div>
+        </div>
+        <div class="hc-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DAILY COLLECTION VIEW
+════════════════════════════════════════ -->
+<div class="view" id="view-daily">
+  <div class="topbar">
+    <div class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="topbar-title">Daily Collection</div>
+    <div class="topbar-date" id="dailyDateLabel">TODAY</div>
+  </div>
+
+  <div class="mod-content">
+    <!-- Date picker -->
+    <div class="date-hero">
+      <div class="date-label" id="dailyDateDisplay">—</div>
+      <input type="date" class="date-pick" id="dailyDatePicker" onchange="onDailyDateChange(this.value)"/>
+    </div>
+
+    <!-- Entry Form -->
+    <div class="entry-form" id="dailyForm">
+      <div class="form-title" id="formTitle">New Entry</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Member ID</label>
+          <input type="number" class="form-input" id="f_memberId" placeholder="101" min="1" inputmode="numeric"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-select" id="f_type">
+            <option value="NEW">🟢 New</option>
+            <option value="RENEWAL">🟡 Renewal</option>
+            <option value="OTHER">🟠 Other</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-input" id="f_name" placeholder="Member Name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cash (₹)</label>
+          <input type="number" class="form-input" id="f_cash" placeholder="0" min="0" inputmode="decimal" oninput="calcTotal()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">UPI (₹)</label>
+          <input type="number" class="form-input" id="f_upi" placeholder="0" min="0" inputmode="decimal" oninput="calcTotal()"/>
+        </div>
+        <div class="form-group full">
+          <div class="total-preview">
+            <span class="tp-label">Total Amount</span>
+            <span class="tp-value" id="totalPreview">₹0</span>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="cancelEditBtn" onclick="cancelEdit()" style="display:none">Cancel</button>
+        <button class="btn btn-primary" id="saveEntryBtn" onclick="saveEntry()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Entry
+        </button>
+      </div>
+    </div>
+
+    <!-- Entries list -->
+    <div class="section-hdr">
+      <div class="section-title">Entries</div>
+      <div class="section-count" id="entryCount">0</div>
+    </div>
+
+    <div class="cards-list" id="dailyCards"></div>
+
+    <!-- Totals -->
+    <div class="total-footer" id="dailyTotals" style="display:none">
+      <div class="tf-row">
+        <div class="tf-label">Cash</div>
+        <div class="tf-value" id="ftCash">₹0</div>
+      </div>
+      <div class="tf-divider"></div>
+      <div class="tf-row">
+        <div class="tf-label">UPI</div>
+        <div class="tf-value" id="ftUPI">₹0</div>
+      </div>
+      <div class="tf-divider"></div>
+      <div class="tf-row">
+        <div class="tf-label">Total</div>
+        <div class="tf-value" id="ftTotal" style="font-size:20px">₹0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MONTHLY REPORT VIEW
+════════════════════════════════════════ -->
+<div class="view" id="view-monthly">
+  <div class="topbar">
+    <div class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="topbar-title">Monthly Report</div>
+    <div class="back-btn" onclick="loadMonthly()" style="margin-left:auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.5"/></svg>
+    </div>
+  </div>
+  <div class="mod-content">
+    <div class="cards-list" id="monthlyCards">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        <p>Loading monthly data…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     EXPENSES VIEW
+════════════════════════════════════════ -->
+<div class="view" id="view-expenses">
+  <div class="topbar">
+    <div class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="topbar-title">Expenses</div>
+  </div>
+
+  <div class="mod-content">
+    <!-- Expense Form -->
+    <div class="entry-form">
+      <div class="form-title">Add Expense</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input date-pick" id="ef_date"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount (₹)</label>
+          <input type="number" class="form-input" id="ef_amount" placeholder="0" min="0" inputmode="decimal"/>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Type</label>
+          <input type="text" class="form-input" id="ef_type" placeholder="e.g. Equipment, Rent…"/>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-input" id="ef_desc" placeholder="Details…"/>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <button class="btn btn-primary" onclick="saveExpense()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Expense
+        </button>
+      </div>
+    </div>
+
+    <div class="section-hdr">
+      <div class="section-title">All Expenses</div>
+      <div class="section-count" id="expCount">0</div>
+    </div>
+
+    <div class="cards-list" id="expenseCards"></div>
+
+    <div class="exp-total" id="expTotal" style="display:none">
+      <div class="et-label">Total Expense</div>
+      <div class="et-value" id="expTotalVal">₹0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     EDIT BOTTOM SHEET
+════════════════════════════════════════ -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+<div class="bottom-sheet" id="bottomSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Edit Entry</div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="form-label">Member ID</label>
+      <input type="number" class="form-input" id="e_memberId" min="1" inputmode="numeric"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select class="form-select" id="e_type">
+        <option value="NEW">🟢 New</option>
+        <option value="RENEWAL">🟡 Renewal</option>
+        <option value="OTHER">🟠 Other</option>
+      </select>
+    </div>
+    <div class="form-group full">
+      <label class="form-label">Name</label>
+      <input type="text" class="form-input" id="e_name"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cash (₹)</label>
+      <input type="number" class="form-input" id="e_cash" min="0" inputmode="decimal" oninput="calcEditTotal()"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">UPI (₹)</label>
+      <input type="number" class="form-input" id="e_upi" min="0" inputmode="decimal" oninput="calcEditTotal()"/>
+    </div>
+    <div class="form-group full">
+      <div class="total-preview">
+        <span class="tp-label">Total</span>
+        <span class="tp-value" id="editTotalPreview">₹0</span>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-ghost" onclick="closeSheet()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveEdit()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Update
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CONFIG — hardcoded credentials
+═══════════════════════════════════════════════════ */
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzYj1ZiuGuXG6d4ZSJGYxFlXGfHfNPoTViNT6QkNMMK4PvyhAKdSk4SUQDmqTZZmxr9Rg/exec';
+
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let currentDate  = todayStr();
+let dailyRows    = [];    // [{entryId,memberId,name,type,cash,upi}]
+let expenseRows  = [];    // [{date,type,description,amount}]
+let editingIdx   = null;  // index into dailyRows for sheet edit
+let entryCounter = 0;
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  // set expense date default
+  document.getElementById('ef_date').value = currentDate;
+  initSheets();
+});
+
+function initSheets() {
+  const sheets = [
+    { name:'DAILY REPORT',    headers:['DATE','ENTRY_ID','MEMBER_ID','NAME','TYPE','CASH','UPI'] },
+    { name:'MONTHLY REPORTS', headers:['MONTH','TOTAL_COLLECTION','TOTAL_ENTRIES'] },
+    { name:'EXPENSE REPORTS', headers:['DATE','TYPE','DESCRIPTION','AMOUNT'] }
+  ];
+  apiPost({ action:'initSheets', sheets })
+    .then(() => hideLoader())
+    .catch(() => { hideLoader(); toast('Offline mode — sheets not connected','error'); });
+}
+
+function hideLoader() {
+  const el = document.getElementById('loadOverlay');
+  el.classList.add('hide');
+  setTimeout(() => el.classList.add('gone'), 320);
+}
+
+/* ═══════════════════════════════════════════════════
+   VIEW NAVIGATION
+═══════════════════════════════════════════════════ */
+function openModule(mod) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+mod).classList.add('active');
+  window.scrollTo(0,0);
+  if (mod === 'daily')    initDaily();
+  if (mod === 'monthly')  loadMonthly();
+  if (mod === 'expenses') loadExpenses();
+}
+
+function goHome() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-home').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ═══════════════════════════════════════════════════
+   DAILY MODULE
+═══════════════════════════════════════════════════ */
+function initDaily() {
+  setDailyDate(currentDate);
+  document.getElementById('dailyDatePicker').value = currentDate;
+  loadDailyEntries();
+}
+
+function setDailyDate(str) {
+  currentDate = str;
+  const d = new Date(str + 'T00:00:00');
+  document.getElementById('dailyDateDisplay').textContent =
+    d.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}).toUpperCase();
+  document.getElementById('dailyDateLabel').textContent =
+    d.toLocaleDateString('en-IN',{weekday:'short'}).toUpperCase();
+}
+
+function onDailyDateChange(val) {
+  setDailyDate(val);
+  loadDailyEntries();
+}
+
+function loadDailyEntries() {
+  document.getElementById('dailyCards').innerHTML = loadingHtml();
+  apiFetch({ action:'getByDate', sheet:'DAILY REPORT', date: currentDate })
+    .then(data => {
+      dailyRows = (data.rows||[]).map(r => ({
+        entryId:  r[1]||'',
+        memberId: r[2]||'',
+        name:     r[3]||'',
+        type:     (r[4]||'OTHER').toUpperCase(),
+        cash:     parseFloat(r[5])||0,
+        upi:      parseFloat(r[6])||0
+      }));
+      entryCounter = dailyRows.length;
+      renderDailyCards();
+    })
+    .catch(() => {
+      dailyRows = [];
+      renderDailyCards();
+      toast('Could not load entries','error');
+    });
+}
+
+function calcTotal() {
+  const c = parseFloat(document.getElementById('f_cash').value)||0;
+  const u = parseFloat(document.getElementById('f_upi').value)||0;
+  document.getElementById('totalPreview').textContent = '₹'+(c+u).toLocaleString('en-IN');
+}
+
+function calcEditTotal() {
+  const c = parseFloat(document.getElementById('e_cash').value)||0;
+  const u = parseFloat(document.getElementById('e_upi').value)||0;
+  document.getElementById('editTotalPreview').textContent = '₹'+(c+u).toLocaleString('en-IN');
+}
+
+function saveEntry() {
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) { toast('Please enter a member name','error'); return; }
+  entryCounter++;
+  const row = {
+    entryId:  'E-'+String(entryCounter).padStart(3,'0'),
+    memberId: document.getElementById('f_memberId').value.trim() || entryCounter,
+    name,
+    type:     document.getElementById('f_type').value,
+    cash:     parseFloat(document.getElementById('f_cash').value)||0,
+    upi:      parseFloat(document.getElementById('f_upi').value)||0
+  };
+  dailyRows.push(row);
+  renderDailyCards();
+  clearDailyForm();
+  persistDaily();
+}
+
+function clearDailyForm() {
+  ['f_memberId','f_name','f_cash','f_upi'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f_type').value = 'NEW';
+  document.getElementById('totalPreview').textContent = '₹0';
+  document.getElementById('formTitle').textContent = 'New Entry';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('saveEntryBtn').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save Entry`;
+}
+
+function cancelEdit() { clearDailyForm(); }
+
+function openEditSheet(idx) {
+  editingIdx = idx;
+  const r = dailyRows[idx];
+  document.getElementById('e_memberId').value = r.memberId;
+  document.getElementById('e_name').value     = r.name;
+  document.getElementById('e_type').value     = r.type;
+  document.getElementById('e_cash').value     = r.cash||'';
+  document.getElementById('e_upi').value      = r.upi||'';
+  calcEditTotal();
+  document.getElementById('sheetOverlay').classList.add('open');
+  document.getElementById('bottomSheet').classList.add('open');
+}
+
+function closeSheet() {
+  document.getElementById('sheetOverlay').classList.remove('open');
+  document.getElementById('bottomSheet').classList.remove('open');
+  editingIdx = null;
+}
+
+function saveEdit() {
+  if (editingIdx === null) return;
+  const name = document.getElementById('e_name').value.trim();
+  if (!name) { toast('Name required','error'); return; }
+  dailyRows[editingIdx] = {
+    entryId:  dailyRows[editingIdx].entryId,
+    memberId: document.getElementById('e_memberId').value.trim(),
+    name,
+    type:     document.getElementById('e_type').value,
+    cash:     parseFloat(document.getElementById('e_cash').value)||0,
+    upi:      parseFloat(document.getElementById('e_upi').value)||0
+  };
+  closeSheet();
+  renderDailyCards();
+  persistDaily();
+}
+
+function persistDaily() {
+  const rows = dailyRows.map(r => [currentDate, r.entryId, r.memberId, r.name, r.type, r.cash, r.upi]);
+  apiPost({ action:'setByDate', sheet:'DAILY REPORT', date: currentDate, rows })
+    .then(() => toast('Saved ✓','success'))
+    .catch(() => toast('Save failed','error'));
+}
+
+function renderDailyCards() {
+  const el = document.getElementById('dailyCards');
+  const cnt = document.getElementById('entryCount');
+  const totEl = document.getElementById('dailyTotals');
+  cnt.textContent = dailyRows.length;
+
+  if (!dailyRows.length) {
+    el.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <p>No entries yet for this date.<br>Add the first one above.</p>
+    </div>`;
+    totEl.style.display = 'none';
+    return;
+  }
+
+  let totalCash=0, totalUPI=0;
+  el.innerHTML = dailyRows.map((r,i) => {
+    totalCash += r.cash; totalUPI += r.upi;
+    const total = r.cash + r.upi;
+    const cls = r.type==='NEW'?'new':r.type==='RENEWAL'?'renewal':'other';
+    const badgeCls = r.type==='NEW'?'badge-new':r.type==='RENEWAL'?'badge-renewal':'badge-other';
+    const initials = r.name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase()||'?';
+    return `<div class="entry-card ${cls}" style="animation-delay:${i*0.04}s">
+      <div class="card-avatar">${initials}</div>
+      <div class="card-body">
+        <div class="card-name">${esc(r.name)}</div>
+        <div class="card-meta">
+          <span class="card-id">#${r.memberId}</span>
+          <span class="card-type-badge ${badgeCls}">${r.type}</span>
+        </div>
+      </div>
+      <div class="card-right">
+        <div class="card-amount">₹${total.toLocaleString('en-IN')}</div>
+        <div class="card-cash-upi">${r.cash?'C:₹'+r.cash:''}${r.cash&&r.upi?' · ':''}${r.upi?'U:₹'+r.upi:''}</div>
+        <button class="card-edit-btn" onclick="openEditSheet(${i})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  totEl.style.display = 'flex';
+  document.getElementById('ftCash').textContent  = '₹'+totalCash.toLocaleString('en-IN');
+  document.getElementById('ftUPI').textContent   = '₹'+totalUPI.toLocaleString('en-IN');
+  document.getElementById('ftTotal').textContent = '₹'+(totalCash+totalUPI).toLocaleString('en-IN');
+}
+
+/* ═══════════════════════════════════════════════════
+   MONTHLY MODULE
+═══════════════════════════════════════════════════ */
+function loadMonthly() {
+  const el = document.getElementById('monthlyCards');
+  el.innerHTML = loadingHtml();
+  apiFetch({ action:'getAll', sheet:'DAILY REPORT' })
+    .then(data => {
+      const map = {};
+      (data.rows||[]).forEach(r => {
+        const d = r[0]; if (!d) return;
+        const dt = new Date(d + 'T00:00:00');
+        const key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+        if (!map[key]) map[key] = { cash:0, upi:0, entries:0 };
+        map[key].cash    += parseFloat(r[5])||0;
+        map[key].upi     += parseFloat(r[6])||0;
+        map[key].entries++;
+      });
+      const keys = Object.keys(map).sort().reverse();
+      if (!keys.length) {
+        el.innerHTML = `<div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          <p>No collection data yet.</p>
+        </div>`;
+        return;
+      }
+      el.innerHTML = keys.map((k,i) => {
+        const [yr,mo] = k.split('-');
+        const label = new Date(+yr,+mo-1,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'}).toUpperCase();
+        const d = map[k];
+        const total = d.cash + d.upi;
+        return `<div class="month-card" style="animation-delay:${i*0.06}s">
+          <div class="month-card-top">
+            <div class="month-name">${label}</div>
+            <div class="month-entries">${d.entries} entries</div>
+          </div>
+          <div class="month-stats">
+            <div class="ms-item">
+              <div class="ms-label">Total Collection</div>
+              <div class="ms-value" style="color:var(--teal)">₹${total.toLocaleString('en-IN')}</div>
+            </div>
+            <div class="ms-item">
+              <div class="ms-label">Avg / Entry</div>
+              <div class="ms-value">₹${d.entries?Math.round(total/d.entries).toLocaleString('en-IN'):0}</div>
+            </div>
+            <div class="ms-item">
+              <div class="ms-label">Cash</div>
+              <div class="ms-value" style="color:var(--green)">₹${d.cash.toLocaleString('en-IN')}</div>
+            </div>
+            <div class="ms-item">
+              <div class="ms-label">UPI</div>
+              <div class="ms-value" style="color:#60a5fa">₹${d.upi.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    })
+    .catch(() => {
+      el.innerHTML = `<div class="empty-state"><p>Failed to load data.</p></div>`;
+    });
+}
+
+/* ═══════════════════════════════════════════════════
+   EXPENSES MODULE
+═══════════════════════════════════════════════════ */
+function loadExpenses() {
+  apiFetch({ action:'getAll', sheet:'EXPENSE REPORTS' })
+    .then(data => {
+      expenseRows = (data.rows||[]).map(r=>({
+        date:        r[0]||'', type: r[1]||'',
+        description: r[2]||'', amount: parseFloat(r[3])||0
+      }));
+      renderExpenseCards();
+    })
+    .catch(() => renderExpenseCards());
+}
+
+function saveExpense() {
+  const type = document.getElementById('ef_type').value.trim();
+  const desc = document.getElementById('ef_desc').value.trim();
+  const amt  = parseFloat(document.getElementById('ef_amount').value)||0;
+  const date = document.getElementById('ef_date').value || currentDate;
+  if (!type && !desc) { toast('Enter type or description','error'); return; }
+  if (!amt) { toast('Enter an amount','error'); return; }
+  const row = { date, type, description:desc, amount:amt };
+  expenseRows.push(row);
+  renderExpenseCards();
+  ['ef_type','ef_desc','ef_amount'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('ef_date').value = currentDate;
+  persistExpenses();
+}
+
+function persistExpenses() {
+  const rows = expenseRows.map(r => [r.date, r.type, r.description, r.amount]);
+  apiPost({ action:'setAll', sheet:'EXPENSE REPORTS', rows })
+    .then(() => toast('Saved ✓','success'))
+    .catch(() => toast('Save failed','error'));
+}
+
+function renderExpenseCards() {
+  const el  = document.getElementById('expenseCards');
+  const cnt = document.getElementById('expCount');
+  const tot = document.getElementById('expTotal');
+  cnt.textContent = expenseRows.length;
+
+  if (!expenseRows.length) {
+    el.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <p>No expenses yet.</p>
+    </div>`;
+    tot.style.display = 'none';
+    return;
+  }
+
+  let totalAmt = 0;
+  el.innerHTML = expenseRows.map((r,i) => {
+    totalAmt += r.amount;
+    const initials = (r.type||'?')[0].toUpperCase();
+    return `<div class="expense-card" style="animation-delay:${i*0.04}s">
+      <div class="exp-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="exp-body">
+        <div class="exp-type">${esc(r.type)||'—'}</div>
+        <div class="exp-desc">${esc(r.description)||'No description'}</div>
+        <div class="exp-date">${r.date}</div>
+      </div>
+      <div class="exp-amount">₹${r.amount.toLocaleString('en-IN')}</div>
+    </div>`;
+  }).join('');
+
+  tot.style.display = 'flex';
+  document.getElementById('expTotalVal').textContent = '₹'+totalAmt.toLocaleString('en-IN');
+}
+
+/* ═══════════════════════════════════════════════════
+   GOOGLE SHEETS API
+═══════════════════════════════════════════════════ */
+function apiFetch(payload) {
+  const url = GS_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
+  return fetch(url, { redirect:'follow' }).then(r => r.json());
+}
+function apiPost(payload) {
+  return fetch(GS_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify(payload),
+    redirect:'follow'
+  }).then(r => r.json());
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════ */
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function loadingHtml() {
+  return `<div class="empty-state"><div class="spinner" style="width:28px;height:28px;border-width:3px"></div><p>Loading…</p></div>`;
+}
+function toast(msg, type='success') {
+  const w = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast '+type;
+  t.innerHTML = `<div class="toast-dot"></div><span>${msg}</span>`;
+  w.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+</script>
+
+<!-- Apps Script (paste into Extensions → Apps Script):
+function doGet(e){var p=JSON.parse(e.parameter.data||'{}');return handleRequest(p)}
+function doPost(e){var p=JSON.parse(e.postData.contents||'{}');return handleRequest(p)}
+function handleRequest(p){var ss=SpreadsheetApp.getActiveSpreadsheet(),result={};try{if(p.action==='initSheets'){p.sheets.forEach(function(def){var sh=ss.getSheetByName(def.name);if(!sh){sh=ss.insertSheet(def.name);sh.appendRow(def.headers);var hdr=sh.getRange(1,1,1,def.headers.length);hdr.setFontWeight('bold');hdr.setBackground('#1a1e2a');hdr.setFontColor('#ffffff');sh.setFrozenRows(1)}else{var fr=sh.getRange(1,1,1,def.headers.length).getValues()[0];if(fr.every(function(c){return c===''||c===null})){sh.insertRowBefore(1);sh.getRange(1,1,1,def.headers.length).setValues([def.headers])}}});result={ok:true}}else if(p.action==='ping'){result={ok:true}}else if(p.action==='getByDate'){var sh=ss.getSheetByName(p.sheet);if(!sh){result={rows:[]}}else{var data=sh.getDataRange().getValues();result={rows:data.slice(1).filter(function(r){return r[0]===p.date})}}}else if(p.action==='setByDate'){var sh=ss.getSheetByName(p.sheet);if(sh){var data=sh.getDataRange().getValues();for(var i=data.length;i>=2;i--){if(data[i-1][0]===p.date)sh.deleteRow(i)}}p.rows.forEach(function(r){sh.appendRow(r)});result={ok:true}}else if(p.action==='getAll'){var sh=ss.getSheetByName(p.sheet);if(!sh){result={rows:[]}}else{result={rows:sh.getDataRange().getValues().slice(1)}}}else if(p.action==='setAll'){var sh=ss.getSheetByName(p.sheet);if(sh){var last=sh.getLastRow();if(last>1)sh.deleteRows(2,last-1);p.rows.forEach(function(r){sh.appendRow(r)})}result={ok:true}}}catch(err){result={error:err.message}}return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON)}
+-->
+
+</body>
+</html>
